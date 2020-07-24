@@ -1,36 +1,60 @@
-import React, { useState } from "react";
+import React from "react";
+import axios from "axios";
 
-const [username, setUsername] = useState("");
-const [password, setPassword] = useState("");
-
-handleChanges = (e) => {
-  setUsername({
-    ...username,
-    [e.target.name]: e.target.value
-  })
-  setPassword({
-    ...password,
-    [e.target.name]: e.target.value
-  })
-}
-
-const Login = (e) => {
+class Login extends React.Component {
   // make a post request to retrieve a token from the api
   // when you have handled the token, navigate to the BubblePage route
-  e.preventDefault();
-  axios.post("http://localhost:5000/api/login", username, password)
-  .then((res) => {
-    localStorage.setItem("token", res.data.payload);
-    this.PaymentResponse.history.push("/colors")
-  })
-  .catch((err) => console.log(err));
+  state = {
+    credentials: {
+      username: "",
+      password: "",
+    },
+  };
 
-  return (
-    <>
-      <h1>Welcome to the Bubble App!</h1>
-      <p>Build a login page here</p>
-    </>
-  );
-};
+  handleChanges = (e) => {
+    this.setState({
+      credentials: {
+        ...this.state.credentials,
+        [e.target.name]: e.target.value,
+      },
+    });
+  };
+
+  login = (e) => {
+    e.preventDefault();
+    axios
+      .post("http://localhost:5000/api/login", this.state.credentials)
+      .then((res) => {
+        localStorage.setItem("token", res.data.payload);
+        this.props.history.push("/bubbles");
+      })
+      .catch((err) => console.log(err));
+  };
+
+  render() {
+    return (
+      <>
+        <h1>Welcome to the Bubble App!</h1>
+        <form onSubmit={this.login}>
+          <input
+            type="text"
+            name="username"
+            value={this.state.credentials.username}
+            onChange={this.handleChanges}
+            placeholder="Username"
+          />
+          <input
+            type="password"
+            name="password"
+            value={this.state.credentials.password}
+            onChange={this.handleChanges}
+            placeholder="Password"
+          />
+          <button>Log In</button>
+        </form>
+      </>
+    );
+  }
+}
 
 export default Login;
